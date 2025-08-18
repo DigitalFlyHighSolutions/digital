@@ -1,6 +1,9 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
+console.log("📧 EMAIL_COMPANY:", process.env.EMAIL_COMPANY);
+console.log("📧 MAIL_PASS:", process.env.MAIL_PASS ? "Loaded ✅" : "❌ Missing");
+
 const transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",   // Hostinger SMTP server
   port: 465,                    // use 465 for SSL, 587 for TLS
