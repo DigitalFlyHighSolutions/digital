@@ -1,87 +1,27 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const quoteRoute = require('./routes/quote');
 const connectDB = require('./config/db');
 const cors = require('cors');
-const Quote = require('./models/Quote');
-const transporter = require('./utils/mailer');
-const util = require('util');
-const sendMail = util.promisify(transporter.sendMail).bind(transporter);
-require('dotenv').config();
-
+const path = require("path");
 const app = express();
+
+
+const quoteRoute = require('./routes/quote');
+const careerRoute = require('./routes/career');
+const PORT = process.env.PORT || 6000;
+
+
+require('dotenv').config();
 app.use(express.json());
 app.use(cors());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+
 
 connectDB();
 
-// app.use('/api', quoteRoute);
-app.post('/quote', async (req, res) => {
- 
-    try {
-        const {
-            name,
-            businessName,
-            email,
-            phone,
-            website,
-            social,
-            message
-        } = req.body;
 
-        const quote = new Quote({
-            name,
-            businessName,
-            email,
-            phone,
-            website,
-            social,
-            message
-        });
-
-        console.log(quote);
-        await quote.save();
-        console.log('Quotion Save to DB');
-// console.log(process.env.EMAIL_company,process.env.MAIL_PASS);
-
-        const mailUser = {
-            from: process.env.EMAIL_company,
-            to: email,
-            subject: 'Digital Fly High - Quote Request',
-            text: `Thank you for your quote request.
-Hi ${name}, we have received your request. Our team will contact you soon.`
-        };
-
-        // Email to HR
-        const mailHR = {
-            from: process.env.EMAIL_company,
-            to: process.env.HR_EMAIL, // HR email from .env
-            subject: 'New Quote Request - Digital Fly High',
-            text: `New quote request received.
-
-Name: ${name}
-Business Name: ${businessName}
-Email: ${email}
-Phone: ${phone}
-Website: ${website}
-Social: ${social}
-Message: ${message}`
-        };
-
-        sendMail(mailUser);
-        sendMail(mailHR);
+app.use('/quote', quoteRoute);
+app.use('/apply',careerRoute);
 
 
-
-        res.status(201).json({ message: 'Quote submitted and emails sent.' });
-    } catch (err) {
-
-        res.status(500).json({ error: 'Something went wrong to backend.', err });
-    }
-});
-
-
-
-
-const PORT = process.env.PORT || 6000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
